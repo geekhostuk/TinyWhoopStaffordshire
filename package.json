@@ -1,0 +1,16 @@
+{
+  "name": "tws-website",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Tiny Whoop Staffordshire club website (Astro). Events synced from the iFPV calendar at build time.",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^5.6.0"
+  }
+}

@@ -1,0 +1,11 @@
+name = "tws-ifpv-rebuild"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+# Rebuild the site at 07:00 UTC every 3rd day. Adjust to taste.
+# (cron format: minute hour day-of-month month day-of-week)
+[triggers]
+crons = ["0 7 */3 * *"]
+
+# DEPLOY_HOOK_URL is set as a secret, not here:
+#   cd automation && npx wrangler secret put DEPLOY_HOOK_URL

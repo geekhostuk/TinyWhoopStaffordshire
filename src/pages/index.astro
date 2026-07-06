@@ -1,0 +1,181 @@
+---
+import '../styles/global.css';
+import { getUpcomingEvents } from '../lib/ifpv';
+
+const events = await getUpcomingEvents();
+
+const FB = 'https://www.facebook.com/profile.php?id=61573767722882';
+const IG = 'https://www.instagram.com/tinywhoopstaffordshire/';
+const IFPV = 'https://www.ifpv.co.uk/series/Social%20Flight%20Night%20(SFN)';
+
+const updated = new Intl.DateTimeFormat('en-GB', {
+  day: 'numeric', month: 'short', year: 'numeric',
+}).format(new Date());
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tiny Whoop Staffordshire — Indoor FPV club, Stone</title>
+  <meta name="description" content="Staffordshire's friendliest indoor micro-FPV club. Social Flight Nights, drone racing and a warm welcome for new pilots across the Potteries." />
+  <link rel="icon" href="/assets/logo.jpg" />
+</head>
+<body>
+
+  <!-- Header -->
+  <header style="position:sticky;top:0;z-index:50;background:rgba(255,255,255,0.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border-subtle)">
+    <div style="max-width:var(--container-max);margin:0 auto;padding:0 var(--gutter);height:74px;display:flex;align-items:center;justify-content:space-between">
+      <a href="#top"><img src="/assets/logo.jpg" alt="Tiny Whoop Staffordshire" style="height:52px;display:block" /></a>
+      <nav class="nav-desktop" style="display:flex;align-items:center;gap:6px">
+        <a href="#intro" class="nav-link">The club</a>
+        <a href="#events" class="nav-link">Events</a>
+        <a href="#join" class="nav-link">Join</a>
+        <a href="#join" class="btn btn--primary btn--sm" style="margin-left:6px">Join the club</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section id="top" style="background:var(--tw-navy);color:#fff;overflow:hidden">
+    <div class="hero-grid" style="max-width:var(--container-max);margin:0 auto;padding:var(--sp-9) var(--gutter);display:grid;grid-template-columns:1.1fr 0.9fr;gap:var(--sp-7);align-items:center">
+      <div>
+        <span style="display:inline-block;background:var(--tw-pink);color:#fff;font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase;border-radius:var(--radius-pill);padding:5px 12px;margin-bottom:20px">Indoor FPV · Stone, Staffordshire</span>
+        <h1 class="hero-title" style="font-family:var(--font-display);text-transform:uppercase;line-height:.92;font-size:72px;margin:0 0 20px;letter-spacing:.01em">Fly small.<br /><span style="color:var(--tw-pink)">Race hard.</span></h1>
+        <p style="font-size:19px;line-height:1.55;color:rgba(255,255,255,0.82);max-width:460px;margin:0 0 28px">Staffordshire's friendliest indoor FPV club! Social Flight Nights, fast-paced racing and a warm welcome whether you're a seasoned pilot or just getting into the hobby. All ages and levels welcome — let's have some fun flying folks!</p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <a href="#join" class="btn btn--primary btn--lg">Join the club</a>
+          <a href="#events" class="btn btn--outline btn--lg btn--on-dark">See what's on</a>
+        </div>
+      </div>
+      <div class="hero-art" style="justify-self:center">
+        <div style="width:300px;height:300px;background:var(--tw-white);border-radius:var(--radius-xl);box-shadow:var(--shadow-lg);transform:rotate(3deg);display:flex;align-items:center;justify-content:center;padding:36px">
+          <img src="/assets/logo.jpg" alt="Tiny Whoop Staffordshire" style="max-width:100%;max-height:100%;display:block" />
+        </div>
+      </div>
+    </div>
+    <div style="height:12px;background:repeating-conic-gradient(#141414 0% 25%, #fff 0% 50%) 0 0 / 24px 24px"></div>
+  </section>
+
+  <!-- Stats -->
+  <section style="max-width:var(--container-max);margin:0 auto;padding:var(--sp-7) var(--gutter)">
+    <div class="stats-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-5)">
+      <div style="text-align:center"><div style="font-family:var(--font-display);font-size:44px;color:var(--tw-pink);line-height:1">All ages</div><div style="font-size:14px;font-weight:600;color:var(--text-muted);margin-top:6px">Everyone welcome</div></div>
+      <div style="text-align:center"><div style="font-family:var(--font-display);font-size:44px;color:var(--tw-pink);line-height:1">65mm</div><div style="font-size:14px;font-weight:600;color:var(--text-muted);margin-top:6px">Sub-249g whoops</div></div>
+      <div style="text-align:center"><div style="font-family:var(--font-display);font-size:44px;color:var(--tw-pink);line-height:1">6pm</div><div style="font-size:14px;font-weight:600;color:var(--text-muted);margin-top:6px">Flight nights, till late</div></div>
+      <div style="text-align:center"><div style="font-family:var(--font-display);font-size:44px;color:var(--tw-pink);line-height:1">Free</div><div style="font-size:14px;font-weight:600;color:var(--text-muted);margin-top:6px">Parking on site</div></div>
+    </div>
+  </section>
+
+  <!-- Intro / The club -->
+  <section id="intro" style="max-width:var(--container-max);margin:0 auto;padding:var(--sp-6) var(--gutter) var(--sp-7);scroll-margin-top:90px">
+    <div style="max-width:640px;margin-bottom:32px">
+      <div style="text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;color:var(--tw-pink);margin-bottom:8px">The club</div>
+      <h2 style="margin:0 0 12px;font-size:34px;font-weight:800;color:var(--tw-navy);line-height:1.1">A friendly home for tiny whoops</h2>
+      <p style="margin:0;font-size:17px;line-height:1.6;color:var(--text-body)">We're a friendly bunch flying micro-FPV "whoops" indoors around Staffordshire! Whether you want to race, learn some freestyle, or you're just getting into the hobby — there's a spot for you, and loads of people happy to help you get going. Let's have fun flying!</p>
+    </div>
+    <div class="cards-3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-5)">
+      <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:var(--sp-5)">
+        <div style="text-transform:uppercase;letter-spacing:.12em;font-size:11px;font-weight:700;color:var(--tw-pink);margin-bottom:8px">Social Flight Nights</div>
+        <h3 style="margin:0 0 8px;font-size:20px;font-weight:800;color:var(--tw-navy)">Fly &amp; socialise</h3>
+        <p style="margin:0;font-size:15px;line-height:1.55">Flying from 6pm in the upstairs function room of the Crown Wharf, Stone. All ages and levels welcome! Bring your own whoop and grab great food and drink from the bar.</p>
+      </div>
+      <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:var(--sp-5)">
+        <div style="text-transform:uppercase;letter-spacing:.12em;font-size:11px;font-weight:700;color:var(--tw-pink);margin-bottom:8px">Racing</div>
+        <h3 style="margin:0 0 8px;font-size:20px;font-weight:800;color:var(--tw-navy)">Race league</h3>
+        <p style="margin:0;font-size:15px;line-height:1.55">Are you ready to race?! Fast-paced FPV drone racing with timed heats and friendly competition. Build your skills, chase those laps and go for the podium!</p>
+      </div>
+      <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:var(--sp-5)">
+        <div style="text-transform:uppercase;letter-spacing:.12em;font-size:11px;font-weight:700;color:var(--tw-pink);margin-bottom:8px">New to it?</div>
+        <h3 style="margin:0 0 8px;font-size:20px;font-weight:800;color:var(--tw-navy)">Not got kit yet?</h3>
+        <p style="margin:0;font-size:15px;line-height:1.55">No worries! Come along, watch the action and have a chat with the pilots. Not sure what to buy? We'll happily point you towards the right whoop and goggles to get you started.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Events -->
+  <section id="events" style="background:var(--surface-card);border-top:1px solid var(--border-subtle);border-bottom:1px solid var(--border-subtle);scroll-margin-top:74px">
+    <div style="max-width:var(--container-max);margin:0 auto;padding:var(--sp-7) var(--gutter)">
+      <div style="text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;color:var(--tw-pink);margin-bottom:8px">What's on</div>
+      <h2 style="margin:0 0 24px;font-size:34px;font-weight:800;color:var(--tw-navy)">Upcoming events</h2>
+      <div style="display:flex;flex-direction:column;gap:var(--sp-4)">
+        {events.length === 0 && (
+          <p style="color:var(--text-muted)">No upcoming flight nights listed right now — check back soon!</p>
+        )}
+        {events.map((e) => (
+          <div class="event">
+            <div class="event__date">
+              <div class="event__day">{e.day}</div>
+              <div class="event__mon">{e.month}</div>
+            </div>
+            <div class="event__rule"></div>
+            <div class="event__body">
+              <div class="event__titlerow">
+                <h3 class="event__title">{e.name}</h3>
+                <span class={`badge badge--${e.statusClass}`}>{e.status}</span>
+              </div>
+              <div class="event__meta">{`${e.name.split('#')[0].trim() || 'Flight Night'} · ${e.venue} · ${e.time}`}</div>
+            </div>
+            {e.statusClass === 'full'
+              ? <a href={e.url} class="btn btn--ghost btn--sm is-disabled event__cta" target="_blank" rel="noopener">Full</a>
+              : <a href={e.url} class="btn btn--primary btn--sm event__cta" target="_blank" rel="noopener">Book</a>}
+          </div>
+        ))}
+      </div>
+      <p style="font-size:13px;color:var(--text-muted);margin-top:20px">Events synced from the <a href={IFPV} style="color:var(--tw-pink);font-weight:700">iFPV calendar</a>. Updated {updated}.</p>
+    </div>
+  </section>
+
+  <!-- Join -->
+  <section id="join" style="scroll-margin-top:74px">
+    <div style="max-width:var(--container-max);margin:0 auto;padding:var(--sp-8) var(--gutter)">
+      <div style="text-align:center;max-width:600px;margin:0 auto 40px">
+        <div style="text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;color:var(--tw-pink);margin-bottom:8px">How to join</div>
+        <h2 style="font-family:var(--font-display);text-transform:uppercase;font-size:48px;color:var(--tw-navy);margin:0 0 12px;line-height:.95">Getting started is easy</h2>
+        <p style="margin:0;font-size:17px;color:var(--text-muted)">New to the hobby? Come along, say hi and see what it's all about — we'll help you get set up with your own kit. Happy flying!</p>
+      </div>
+
+      <div class="join-steps" style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-5);margin-bottom:48px">
+        <div style="text-align:center">
+          <div style="width:52px;height:52px;border-radius:50%;background:var(--tw-navy);color:#fff;font-family:var(--font-display);font-size:26px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px">1</div>
+          <h3 style="margin:0 0 6px;font-size:18px;font-weight:800;color:var(--tw-navy)">Come and say hi</h3>
+          <p style="margin:0;font-size:15px;line-height:1.55">Pop along to the Crown Wharf, Stone from 6pm! Free parking, and great food and drink from the bar. Watch the flying and meet the crew.</p>
+        </div>
+        <div style="text-align:center">
+          <div style="width:52px;height:52px;border-radius:50%;background:var(--tw-navy);color:#fff;font-family:var(--font-display);font-size:26px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px">2</div>
+          <h3 style="margin:0 0 6px;font-size:18px;font-weight:800;color:var(--tw-navy)">Get your kit sorted</h3>
+          <p style="margin:0;font-size:15px;line-height:1.55">Not got a whoop yet? We'll help you choose a 65mm Tiny Whoop and goggles to suit you. Sub-249g, so no licence needed to give it a go!</p>
+        </div>
+        <div style="text-align:center">
+          <div style="width:52px;height:52px;border-radius:50%;background:var(--tw-navy);color:#fff;font-family:var(--font-display);font-size:26px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px">3</div>
+          <h3 style="margin:0 0 6px;font-size:18px;font-weight:800;color:var(--tw-navy)">Register &amp; fly</h3>
+          <p style="margin:0;font-size:15px;line-height:1.55">Ready to go? Sign up for the next Social Flight Night on iFPV and become a regular. All ages and levels welcome — let's have fun flying folks!</p>
+        </div>
+      </div>
+
+      <div style="text-align:center;margin-top:8px">
+        <a href={IFPV} class="btn btn--primary btn--lg">Register for a flight night</a>
+        <div style="font-size:13px;color:var(--text-muted);margin-top:12px">Come say hi on <a href={FB} target="_blank" rel="noopener" style="color:var(--tw-pink);font-weight:700;text-decoration:none">Facebook</a> · <a href={IG} target="_blank" rel="noopener" style="color:var(--tw-pink);font-weight:700;text-decoration:none">Instagram</a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer style="background:var(--tw-navy);color:rgba(255,255,255,0.75)">
+    <div style="max-width:var(--container-max);margin:0 auto;padding:var(--sp-7) var(--gutter);display:flex;flex-wrap:wrap;gap:var(--sp-6);justify-content:space-between;align-items:center">
+      <img src="/assets/logo.jpg" alt="Tiny Whoop Staffordshire" style="height:56px;border-radius:8px" />
+      <div style="max-width:360px">
+        <p style="margin:0 0 10px;font-size:14px;line-height:1.6">Staffordshire's friendly indoor FPV club. Social Flight Nights, drone racing and a warm welcome for new pilots — all ages welcome. Happy flying folks!</p>
+        <div style="font-size:14px;font-weight:700">
+          <a href={FB} target="_blank" rel="noopener" style="color:#fff;text-decoration:none">Facebook</a>
+          <span style="opacity:.4;margin:0 6px">·</span>
+          <a href={IG} target="_blank" rel="noopener" style="color:#fff;text-decoration:none">Instagram</a>
+        </div>
+      </div>
+    </div>
+    <div style="border-top:1px solid rgba(255,255,255,0.12);padding:18px var(--gutter);text-align:center;font-size:12px">© 2026 Tiny Whoop Staffordshire · A friendly hobby club · Stone, Staffordshire</div>
+  </footer>
+
+</body>
+</html>

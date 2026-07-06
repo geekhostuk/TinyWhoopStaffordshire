@@ -1,0 +1,150 @@
+/* ============================================================================
+   Tiny Whoop Staffordshire — Design System
+   Ported from the Claude Design project "Tiny Whoop Staffordshire Design
+   System" (tokens + Button) into a single stylesheet.
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,400;0,500;0,600;0,700;0,800;1,600;1,800&display=swap');
+
+:root {
+  /* ---- Brand core ---- */
+  --tw-pink: #F4165B;
+  --tw-pink-600: #D40E4C;
+  --tw-pink-400: #FF4E82;
+  --tw-pink-100: #FFE0EA;
+
+  --tw-navy: #0B1E5C;
+  --tw-navy-700: #081748;
+  --tw-navy-500: #1B3488;
+  --tw-navy-100: #E1E7F6;
+
+  --tw-red: #D8261E;
+  --tw-red-600: #B21A14;
+
+  --tw-track: #141414;
+  --tw-white: #FFFFFF;
+
+  /* ---- Neutrals ---- */
+  --tw-ink-900: #0B1330;
+  --tw-ink-700: #33395A;
+  --tw-ink-500: #626A8C;
+  --tw-ink-300: #A8AEC6;
+  --tw-ink-200: #CBD0E1;
+  --tw-ink-100: #E7EAF3;
+  --tw-ink-50:  #F4F6FB;
+
+  /* ---- Semantic aliases ---- */
+  --text-strong: var(--tw-navy);
+  --text-body: var(--tw-ink-700);
+  --text-muted: var(--tw-ink-500);
+  --surface-page: var(--tw-ink-50);
+  --surface-card: var(--tw-white);
+  --border-subtle: var(--tw-ink-200);
+  --focus-ring: var(--tw-pink);
+  --status-success: #1E9E5A;
+
+  /* ---- Typography ---- */
+  --font-display: 'Anton', 'Arial Narrow', sans-serif;
+  --font-sans: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* ---- Spacing (4px grid) ---- */
+  --sp-1: 0.25rem; --sp-2: 0.5rem; --sp-3: 0.75rem; --sp-4: 1rem;
+  --sp-5: 1.5rem;  --sp-6: 2rem;   --sp-7: 3rem;    --sp-8: 4rem; --sp-9: 6rem;
+  --container-max: 1200px;
+  --gutter: 1.5rem;
+  --control-h-sm: 34px; --control-h-md: 44px; --control-h-lg: 54px;
+
+  /* ---- Effects ---- */
+  --radius-sm: 6px; --radius-md: 12px; --radius-lg: 18px; --radius-xl: 28px;
+  --radius-pill: 999px;
+  --shadow-sm: 0 1px 2px rgba(11, 30, 92, 0.10);
+  --shadow-md: 0 6px 18px rgba(11, 30, 92, 0.12);
+  --shadow-lg: 0 18px 40px rgba(11, 30, 92, 0.16);
+  --shadow-pink: 0 8px 24px rgba(244, 22, 91, 0.35);
+  --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast: 120ms;
+}
+
+/* ---- Base reset ---- */
+html { scroll-behavior: smooth; }
+body { margin: 0; font-family: var(--font-sans); background: var(--surface-page); color: var(--text-body); }
+* { box-sizing: border-box; }
+img { max-width: 100%; }
+
+/* ============================================================================
+   Button — port of the design system's <Button> React component to plain CSS.
+   ========================================================================== */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: var(--control-h-md); padding: 0 22px;
+  font-family: var(--font-sans); font-weight: 700; font-size: 15px;
+  line-height: 1; letter-spacing: 0.01em;
+  border-radius: var(--radius-pill); border: 2px solid transparent;
+  cursor: pointer; white-space: nowrap; text-decoration: none;
+  transition: transform var(--dur-fast) var(--ease-pop),
+              background var(--dur-fast), box-shadow var(--dur-fast), color var(--dur-fast);
+}
+.btn:active { transform: scale(0.96); }
+.btn--sm { height: var(--control-h-sm); padding: 0 16px; font-size: 14px; }
+.btn--lg { height: var(--control-h-lg); padding: 0 30px; font-size: 17px; }
+
+.btn--primary { background: var(--tw-pink); color: #fff; box-shadow: var(--shadow-pink); }
+.btn--primary:hover { background: var(--tw-pink-400); }
+.btn--secondary { background: var(--tw-navy); color: #fff; }
+.btn--secondary:hover { background: var(--tw-navy-500); }
+.btn--outline { background: transparent; color: var(--tw-navy); border-color: var(--tw-navy); }
+.btn--outline:hover { background: var(--tw-navy-100); }
+.btn--ghost { background: transparent; color: var(--tw-navy); }
+.btn--ghost:hover { background: var(--tw-ink-100); }
+.btn--on-dark { color: #fff; border-color: rgba(255,255,255,0.5); }
+.btn--on-dark:hover { background: rgba(255,255,255,0.12); }
+.btn.is-disabled { opacity: 0.5; pointer-events: none; }
+
+/* ---- Nav links ---- */
+.nav-link {
+  text-decoration: none; font-weight: 700; font-size: 15px;
+  color: var(--tw-navy); padding: 8px 14px; border-radius: var(--radius-pill);
+}
+.nav-link:hover { background: var(--tw-ink-100); }
+
+/* ============================================================================
+   Event card (data-driven from the iFPV sync)
+   ========================================================================== */
+.event {
+  display: flex; align-items: center; gap: var(--sp-5);
+  background: var(--surface-page); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg); padding: var(--sp-4) var(--sp-5);
+}
+.event__date { text-align: center; min-width: 60px; }
+.event__day { font-family: var(--font-display); font-size: 30px; color: var(--tw-navy); line-height: 1; }
+.event__mon { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--tw-pink); }
+.event__rule { width: 1px; align-self: stretch; background: var(--border-subtle); }
+.event__body { flex: 1; }
+.event__titlerow { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; flex-wrap: wrap; }
+.event__title { margin: 0; font-size: 18px; font-weight: 800; color: var(--tw-navy); }
+.event__meta { font-size: 14px; color: var(--text-muted); font-weight: 600; }
+
+.badge {
+  font-weight: 700; font-size: 10px; letter-spacing: .04em; text-transform: uppercase;
+  border-radius: var(--radius-pill); padding: 3px 8px; color: #fff;
+}
+.badge--open { background: var(--status-success); }
+.badge--low  { background: var(--tw-red); }
+.badge--full { background: var(--tw-navy-100); color: var(--tw-navy); }
+
+/* ============================================================================
+   Responsive
+   ========================================================================== */
+@media (max-width: 860px) {
+  .hero-grid { grid-template-columns: 1fr !important; }
+  .hero-art { display: none !important; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .cards-3 { grid-template-columns: 1fr !important; }
+  .join-steps { grid-template-columns: 1fr !important; }
+  .hero-title { font-size: 48px !important; }
+  .nav-desktop { display: none !important; }
+}
+@media (max-width: 560px) {
+  .event { flex-wrap: wrap; }
+  .event__cta { width: 100%; }
+}
