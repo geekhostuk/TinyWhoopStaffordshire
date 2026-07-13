@@ -11,6 +11,31 @@ const IFPV = 'https://www.ifpv.co.uk/series/Social%20Flight%20Night%20(SFN)';
 const updated = new Intl.DateTimeFormat('en-GB', {
   day: 'numeric', month: 'short', year: 'numeric',
 }).format(new Date());
+
+// Absolute URLs for canonical + social cards, derived from `site` in astro.config.
+const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+const ogImage = new URL('/assets/logo.jpg', Astro.site).toString();
+const title = 'Tiny Whoop Staffordshire — Indoor FPV club, Stone';
+const description = "Staffordshire's friendliest indoor micro-FPV club. Social Flight Nights, drone racing and a warm welcome for new pilots across the Potteries.";
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SportsActivityLocation',
+  name: 'Tiny Whoop Staffordshire',
+  description,
+  url: canonical,
+  logo: ogImage,
+  image: ogImage,
+  sport: 'FPV drone racing',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: 'Crown Wharf',
+    addressLocality: 'Stone',
+    addressRegion: 'Staffordshire',
+    addressCountry: 'GB',
+  },
+  sameAs: [FB, IG],
+};
 ---
 
 <!DOCTYPE html>
@@ -18,9 +43,30 @@ const updated = new Intl.DateTimeFormat('en-GB', {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Tiny Whoop Staffordshire — Indoor FPV club, Stone</title>
-  <meta name="description" content="Staffordshire's friendliest indoor micro-FPV club. Social Flight Nights, drone racing and a warm welcome for new pilots across the Potteries." />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href={canonical} />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#141414" />
   <link rel="icon" href="/assets/logo.jpg" />
+
+  <!-- Open Graph (Facebook, LinkedIn, etc.) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Tiny Whoop Staffordshire" />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={canonical} />
+  <meta property="og:image" content={ogImage} />
+  <meta property="og:locale" content="en_GB" />
+
+  <!-- Twitter card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={title} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={ogImage} />
+
+  <!-- Structured data -->
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 </head>
 <body>
 
