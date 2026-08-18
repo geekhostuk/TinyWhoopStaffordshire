@@ -131,6 +131,8 @@ img { max-width: 100%; }
 .badge--open { background: var(--status-success); }
 .badge--low  { background: var(--tw-red); }
 .badge--full { background: var(--tw-navy-100); color: var(--tw-navy); }
+/* Registration hasn't opened yet — "Opens 17 Aug". */
+.badge--soon { background: var(--tw-navy-500); }
 
 /* ============================================================================
    Responsive

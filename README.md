@@ -2,18 +2,30 @@
 
 An [Astro](https://astro.build) static site for the Tiny Whoop Staffordshire
 (TWS) club, hosted on **Cloudflare Pages**. The **Upcoming events** section is
-synced from the club's **Social Flight Night** events on the [iFPV calendar][ifpv]
-— fetched at *build time* and baked into the static HTML.
+synced from the club's events on the iFPV calendar — fetched at *build time* and
+baked into the static HTML.
+
+Two iFPV series are merged, because the club's events live in both:
+
+| Series | What's in it |
+| --- | --- |
+| [Social Flight Night (SFN)][sfn] | The original flight-night series (up to #33) |
+| [TWStaffordshire][tws] | Current series — flight nights #34 on, plus one-off club events like race days |
+
+Events listed in both are de-duplicated by iFPV event id, and only today-or-later
+dates are shown. The page lists the next `MAX_EVENTS` (6, set in `index.astro`)
+with a *"View N more events on iFPV"* link for the rest.
 
 Built from the *"Tiny Whoop Staffordshire Design System"* Claude Design project.
 
-[ifpv]: https://www.ifpv.co.uk/series/Social%20Flight%20Night%20(SFN)
+[sfn]: https://www.ifpv.co.uk/series/Social%20Flight%20Night%20(SFN)
+[tws]: https://www.ifpv.co.uk/series/TWStaffordshire
 
 ## Project layout
 
 ```
 src/pages/index.astro     The home page (single scroll: intro · events · join)
-src/lib/ifpv.ts           iFPV event sync — fetch + parse, runs at build time
+src/lib/ifpv.ts           iFPV event sync — fetch + merge both series, at build time
 src/styles/global.css     Design system (colours, type, spacing, buttons)
 public/assets/logo.jpg    Club logo
 automation/               Cloudflare Worker that triggers scheduled rebuilds
@@ -78,6 +90,16 @@ visiting the Worker's URL triggers a rebuild on demand too.
   keeps the page fast, cached at the edge, and search-friendly.
 - **Availability badges** (`Open` / `N spots left` / `Full`) are derived from the
   real registration counts; each **Book** button links to the live iFPV page.
+  Events whose registration hasn't opened yet show `Opens 17 Aug` / `Opens today`
+  and a **Details** button instead — iFPV gives the day, not the hour, so on the
+  day itself the card says "today" rather than claiming a bookable spot.
+- **Venue and time** come from the free-text event description, which is written
+  by hand and varies (`Where:` / `When:` on newer events, prose on older ones).
+  `tidyVenue()` shortens whatever it finds to `Venue, Town`, falling back to the
+  postcode when an event has no description text at all (common for race days).
+- **Adding another series:** append it to the `SERIES` array in `src/lib/ifpv.ts`.
+  A series that fails to fetch is warned about and skipped, so it can't break the
+  build.
 - **Logo:** `public/assets/logo.jpg` has a light-grey matte (JPEGs can't be
   transparent). A transparent **PNG** would sit more cleanly on the hero panel —
   drop one in as `logo.png` and update the references in `index.astro`.
