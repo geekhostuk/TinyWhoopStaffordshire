@@ -2,10 +2,14 @@ name = "tws-ifpv-rebuild"
 main = "src/index.ts"
 compatibility_date = "2025-01-01"
 
-# Rebuild the site at 07:00 UTC every 3rd day. Adjust to taste.
-# (cron format: minute hour day-of-month month day-of-week)
+# Cron-only Worker: no public URL, so nobody can trigger builds by visiting it.
+workers_dev = false
+
+# Rebuild the site every day at 05:00 UTC, so the events list is never more
+# than a day old. (cron format: minute hour day-of-month month day-of-week)
+# For every 48 hours instead, use "0 5 */2 * *".
 [triggers]
-crons = ["0 7 */3 * *"]
+crons = ["0 5 * * *"]
 
 # DEPLOY_HOOK_URL is set as a secret, not here:
-#   cd automation && npx wrangler secret put DEPLOY_HOOK_URL
+#   cd automation && npx wrangler secret put DEPLOY_HOOK_URL --config wrangler.toml

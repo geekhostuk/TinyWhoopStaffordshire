@@ -13,47 +13,101 @@ const FB = 'https://www.facebook.com/profile.php?id=61573767722882';
 const IG = 'https://www.instagram.com/tinywhoopstaffordshire/';
 const IFPV = 'https://www.ifpv.co.uk/series/TWStaffordshire';
 
+const now = new Date();
 const updated = new Intl.DateTimeFormat('en-GB', {
   day: 'numeric', month: 'short', year: 'numeric',
-}).format(new Date());
+}).format(now);
+
+// The venue can change from event to event, so it always comes from iFPV —
+// "next up" is simply the soonest event that names one.
+const nextVenue = allEvents.find((e) => e.venue)?.venue ?? '';
 
 // Absolute URLs for canonical + social cards, derived from `site` in astro.config.
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 const ogImage = new URL('/assets/logo.jpg', Astro.site).toString();
-const title = 'Tiny Whoop Staffordshire — Indoor FPV club, Stone';
-const description = "Staffordshire's friendliest indoor micro-FPV club. Social Flight Nights, drone racing and a warm welcome for new pilots across the Potteries.";
+const title = 'Tiny Whoop Staffordshire | Indoor FPV Drone Club & Flight Nights';
+const description = "Staffordshire's friendliest indoor FPV drone club. Tiny Whoop Social Flight Nights and micro drone racing, all ages and levels welcome. See upcoming events and book on iFPV.";
+
+const ORG_ID = `${canonical}#club`;
+const SPOTS = { open: 'InStock', low: 'LimitedAvailability', full: 'SoldOut', soon: 'PreOrder' } as const;
 
 const jsonLd = {
   '@context': 'https://schema.org',
-  '@type': 'SportsActivityLocation',
-  name: 'Tiny Whoop Staffordshire',
-  description,
-  url: canonical,
-  logo: ogImage,
-  image: ogImage,
-  sport: 'FPV drone racing',
-  address: {
-    '@type': 'PostalAddress',
-    streetAddress: 'Crown Wharf',
-    addressLocality: 'Stone',
-    addressRegion: 'Staffordshire',
-    addressCountry: 'GB',
-  },
-  sameAs: [FB, IG],
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${canonical}#website`,
+      url: canonical,
+      name: 'Tiny Whoop Staffordshire',
+      inLanguage: 'en-GB',
+      publisher: { '@id': ORG_ID },
+    },
+    {
+      // No fixed address — the club meets at whichever venue each event lists.
+      '@type': 'SportsOrganization',
+      '@id': ORG_ID,
+      name: 'Tiny Whoop Staffordshire',
+      alternateName: 'TWS',
+      description,
+      url: canonical,
+      logo: ogImage,
+      image: ogImage,
+      sport: 'FPV drone racing',
+      areaServed: { '@type': 'AdministrativeArea', name: 'Staffordshire, England' },
+      sameAs: [FB, IG, IFPV],
+    },
+    // One Event per upcoming listing, so Google can show them as event results.
+    ...events.map((e) => ({
+      '@type': 'Event',
+      name: `${e.name} — Tiny Whoop Staffordshire`,
+      description: `${e.kind} with Tiny Whoop Staffordshire: indoor FPV flying${e.venue ? ` at ${e.venue}` : ''}. All ages and levels welcome.`,
+      startDate: e.start,
+      ...(e.end ? { endDate: e.end } : {}),
+      eventStatus: 'https://schema.org/EventScheduled',
+      eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+      url: e.url,
+      image: ogImage,
+      location: {
+        '@type': 'Place',
+        name: e.venue.split(',')[0] || e.postcode || 'Staffordshire',
+        address: {
+          '@type': 'PostalAddress',
+          ...(e.address ? { streetAddress: e.address } : {}),
+          ...(e.postcode ? { postalCode: e.postcode } : {}),
+          addressRegion: 'Staffordshire',
+          addressCountry: 'GB',
+        },
+      },
+      organizer: { '@id': ORG_ID },
+      offers: {
+        '@type': 'Offer',
+        url: e.url,
+        availability: `https://schema.org/${SPOTS[e.statusClass]}`,
+        ...(e.regOpens ? { validFrom: e.regOpens } : {}),
+      },
+    })),
+  ],
 };
 ---
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{title}</title>
   <meta name="description" content={description} />
   <link rel="canonical" href={canonical} />
-  <meta name="robots" content="index, follow" />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
   <meta name="theme-color" content="#141414" />
-  <link rel="icon" href="/assets/logo.jpg" />
+  <link rel="icon" type="image/jpeg" href="/assets/logo.jpg" />
+  <link rel="apple-touch-icon" href="/assets/logo.jpg" />
+  <link rel="sitemap" href="/sitemap-index.xml" />
+
+  <!-- Fonts: preconnect + <link> instead of a CSS @import, so they load in parallel -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,400;0,500;0,600;0,700;0,800;1,600;1,800&display=swap" />
 
   <!-- Open Graph (Facebook, LinkedIn, etc.) -->
   <meta property="og:type" content="website" />
@@ -62,6 +116,9 @@ const jsonLd = {
   <meta property="og:description" content={description} />
   <meta property="og:url" content={canonical} />
   <meta property="og:image" content={ogImage} />
+  <meta property="og:image:width" content="1462" />
+  <meta property="og:image:height" content="984" />
+  <meta property="og:image:alt" content="Tiny Whoop Staffordshire club logo" />
   <meta property="og:locale" content="en_GB" />
 
   <!-- Twitter card -->
@@ -69,6 +126,7 @@ const jsonLd = {
   <meta name="twitter:title" content={title} />
   <meta name="twitter:description" content={description} />
   <meta name="twitter:image" content={ogImage} />
+  <meta name="twitter:image:alt" content="Tiny Whoop Staffordshire club logo" />
 
   <!-- Structured data -->
   <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
@@ -78,8 +136,8 @@ const jsonLd = {
   <!-- Header -->
   <header style="position:sticky;top:0;z-index:50;background:rgba(255,255,255,0.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border-subtle)">
     <div style="max-width:var(--container-max);margin:0 auto;padding:0 var(--gutter);height:74px;display:flex;align-items:center;justify-content:space-between">
-      <a href="#top"><img src="/assets/logo.jpg" alt="Tiny Whoop Staffordshire" style="height:52px;display:block" /></a>
-      <nav class="nav-desktop" style="display:flex;align-items:center;gap:6px">
+      <a href="#top" aria-label="Tiny Whoop Staffordshire — back to top"><img src="/assets/logo.jpg" alt="Tiny Whoop Staffordshire" width="77" height="52" style="height:52px;width:auto;display:block" /></a>
+      <nav class="nav-desktop" aria-label="Main" style="display:flex;align-items:center;gap:6px">
         <a href="#intro" class="nav-link">The club</a>
         <a href="#events" class="nav-link">Events</a>
         <a href="#join" class="nav-link">Join</a>
@@ -88,12 +146,13 @@ const jsonLd = {
     </div>
   </header>
 
+  <main>
   <!-- Hero -->
   <section id="top" style="background:var(--tw-navy);color:#fff;overflow:hidden">
     <div class="hero-grid" style="max-width:var(--container-max);margin:0 auto;padding:var(--sp-9) var(--gutter);display:grid;grid-template-columns:1.1fr 0.9fr;gap:var(--sp-7);align-items:center">
       <div>
-        <span style="display:inline-block;background:var(--tw-pink);color:#fff;font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase;border-radius:var(--radius-pill);padding:5px 12px;margin-bottom:20px">Indoor FPV · Stone, Staffordshire</span>
-        <h1 class="hero-title" style="font-family:var(--font-display);text-transform:uppercase;line-height:.92;font-size:72px;margin:0 0 20px;letter-spacing:.01em">Fly small.<br /><span style="color:var(--tw-pink)">Race hard.</span></h1>
+        <span style="display:inline-block;background:var(--tw-pink);color:#fff;font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase;border-radius:var(--radius-pill);padding:5px 12px;margin-bottom:20px">Indoor FPV drone club · Staffordshire</span>
+        <h1 class="hero-title" style="font-family:var(--font-display);text-transform:uppercase;line-height:.92;font-size:72px;margin:0 0 20px;letter-spacing:.01em"><span class="sr-only">Tiny Whoop Staffordshire: </span>Fly small.<br /><span style="color:var(--tw-pink)">Race hard.</span></h1>
         <p style="font-size:19px;line-height:1.55;color:rgba(255,255,255,0.82);max-width:460px;margin:0 0 28px">Staffordshire's friendliest indoor FPV club! Social Flight Nights, fast-paced racing and a warm welcome whether you're a seasoned pilot or just getting into the hobby. All ages and levels welcome — let's have some fun flying folks!</p>
         <div style="display:flex;gap:12px;flex-wrap:wrap">
           <a href="#join" class="btn btn--primary btn--lg">Join the club</a>
@@ -102,7 +161,7 @@ const jsonLd = {
       </div>
       <div class="hero-art" style="justify-self:center">
         <div style="width:300px;height:300px;background:var(--tw-white);border-radius:var(--radius-xl);box-shadow:var(--shadow-lg);transform:rotate(3deg);display:flex;align-items:center;justify-content:center;padding:36px">
-          <img src="/assets/logo.jpg" alt="Tiny Whoop Staffordshire" style="max-width:100%;max-height:100%;display:block" />
+          <img src="/assets/logo.jpg" alt="Tiny Whoop Staffordshire logo" width="1462" height="984" fetchpriority="high" style="max-width:100%;max-height:100%;width:auto;height:auto;display:block" />
         </div>
       </div>
     </div>
@@ -130,7 +189,7 @@ const jsonLd = {
       <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:var(--sp-5)">
         <div style="text-transform:uppercase;letter-spacing:.12em;font-size:11px;font-weight:700;color:var(--tw-pink);margin-bottom:8px">Social Flight Nights</div>
         <h3 style="margin:0 0 8px;font-size:20px;font-weight:800;color:var(--tw-navy)">Fly &amp; socialise</h3>
-        <p style="margin:0;font-size:15px;line-height:1.55">Flying from 6pm in the upstairs function room of the Crown Wharf, Stone. All ages and levels welcome! Bring your own whoop and grab great food and drink from the bar.</p>
+        <p style="margin:0;font-size:15px;line-height:1.55">Flying from 6pm{nextVenue ? <> — next up at <strong>{nextVenue}</strong></> : ''}. The venue is shown on every event below, so check before you set off! All ages and levels welcome — bring your own whoop.</p>
       </div>
       <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:var(--sp-5)">
         <div style="text-transform:uppercase;letter-spacing:.12em;font-size:11px;font-weight:700;color:var(--tw-pink);margin-bottom:8px">Racing</div>
@@ -156,10 +215,10 @@ const jsonLd = {
         )}
         {events.map((e) => (
           <div class="event">
-            <div class="event__date">
+            <time class="event__date" datetime={e.iso} title={e.dateLabel}>
               <div class="event__day">{e.day}</div>
               <div class="event__mon">{e.month}</div>
-            </div>
+            </time>
             <div class="event__rule"></div>
             <div class="event__body">
               <div class="event__titlerow">
@@ -196,7 +255,7 @@ const jsonLd = {
         <div style="text-align:center">
           <div style="width:52px;height:52px;border-radius:50%;background:var(--tw-navy);color:#fff;font-family:var(--font-display);font-size:26px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px">1</div>
           <h3 style="margin:0 0 6px;font-size:18px;font-weight:800;color:var(--tw-navy)">Come and say hi</h3>
-          <p style="margin:0;font-size:15px;line-height:1.55">Pop along to the Crown Wharf, Stone from 6pm! Free parking, and great food and drink from the bar. Watch the flying and meet the crew.</p>
+          <p style="margin:0;font-size:15px;line-height:1.55">Pop along to a flight night from 6pm — check the <a href="#events" style="color:var(--tw-pink);font-weight:700">event listing</a> for where we're flying. Watch the action and meet the crew.</p>
         </div>
         <div style="text-align:center">
           <div style="width:52px;height:52px;border-radius:50%;background:var(--tw-navy);color:#fff;font-family:var(--font-display);font-size:26px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px">2</div>
@@ -216,11 +275,12 @@ const jsonLd = {
       </div>
     </div>
   </section>
+  </main>
 
   <!-- Footer -->
   <footer style="background:var(--tw-navy);color:rgba(255,255,255,0.75)">
     <div style="max-width:var(--container-max);margin:0 auto;padding:var(--sp-7) var(--gutter);display:flex;flex-wrap:wrap;gap:var(--sp-6);justify-content:space-between;align-items:center">
-      <img src="/assets/logo.jpg" alt="Tiny Whoop Staffordshire" style="height:56px;border-radius:8px" />
+      <img src="/assets/logo.jpg" alt="Tiny Whoop Staffordshire" width="83" height="56" loading="lazy" decoding="async" style="height:56px;width:auto;border-radius:8px" />
       <div style="max-width:360px">
         <p style="margin:0 0 10px;font-size:14px;line-height:1.6">Staffordshire's friendly indoor FPV club. Social Flight Nights, drone racing and a warm welcome for new pilots — all ages welcome. Happy flying folks!</p>
         <div style="font-size:14px;font-weight:700">
@@ -230,7 +290,7 @@ const jsonLd = {
         </div>
       </div>
     </div>
-    <div style="border-top:1px solid rgba(255,255,255,0.12);padding:18px var(--gutter);text-align:center;font-size:12px">© 2026 Tiny Whoop Staffordshire · A friendly hobby club · Stone, Staffordshire<br /><span style="opacity:.75">Site by <a href="https://geekhost.uk/" target="_blank" rel="noopener" style="color:#fff;font-weight:700;text-decoration:none">Geekhost</a></span></div>
+    <div style="border-top:1px solid rgba(255,255,255,0.12);padding:18px var(--gutter);text-align:center;font-size:12px">© {now.getFullYear()} Tiny Whoop Staffordshire · A friendly hobby club · Staffordshire<br /><span style="opacity:.75">Site by <a href="https://geekhost.uk/" target="_blank" rel="noopener" style="color:#fff;font-weight:700;text-decoration:none">Geekhost</a></span></div>
   </footer>
 
 </body>

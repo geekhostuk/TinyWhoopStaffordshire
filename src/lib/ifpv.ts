@@ -46,8 +46,14 @@ export interface IfpvEvent {
   regOpens: string | null;
   iso: string;
   postcode: string;
+  /** Short label for the card, e.g. "The Mill at Worston, Stafford". */
   venue: string;
+  /** Full street address as written on iFPV (for structured data), may be "". */
+  address: string;
   time: string;
+  /** ISO 8601 start/end with UK offset, e.g. "2027-02-18T18:00:00+00:00" (date only if no time given). */
+  start: string;
+  end: string | null;
   day: number;
   month: string;
   dateLabel: string;
@@ -137,20 +143,26 @@ function mergeRows(lists: SeriesRow[][]): SeriesRow[] {
   return [...byId.values()];
 }
 
-interface Detail { iso: string | null; postcode: string; venue: string; time: string }
+interface Detail { iso: string | null; postcode: string; venue: string; address: string; time: string }
+
+/** Drop a leading "Located in the … room of the" so only the address remains. */
+function cleanAddress(where: string): string {
+  let s = where.trim();
+  const of = s.toLowerCase().lastIndexOf(' of the ');
+  if (of >= 0) s = s.slice(of + ' of the '.length);
+  return s.replace(/[\s,;.]+$/, '');
+}
 
 /**
  * Pull a short venue label out of the free-text "Where:" line. Descriptions are
  * written by hand and vary, e.g.
- *   "Located in the upstairs function room of the Crown Wharf, Stone, ST15 8QN"
- *     → "Crown Wharf, Stone"
+ *   "Located in the function room of the Some Pub, Town, AB1 2CD"
+ *     → "Some Pub, Town"
  *   "The Mill at Worston, Worston Lane, …, Stafford ST18 9QA"
  *     → "The Mill at Worston, Stafford"
  */
 function tidyVenue(where: string): string {
-  let s = where.replace(new RegExp(`\\s*${POSTCODE.source}\\.?$`), '').trim();
-  const of = s.toLowerCase().lastIndexOf(' of the ');
-  if (of >= 0) s = s.slice(of + ' of the '.length);
+  const s = cleanAddress(where).replace(new RegExp(`\\s*${POSTCODE.source}$`), '').trim();
   const parts = s.split(',').map((p) => p.trim()).filter(Boolean);
   if (parts.length === 0) return '';
   if (parts.length <= 2) return parts.join(', ');
@@ -177,12 +189,14 @@ function parseDetail(html: string): Detail {
   const prose = text.match(/\bat\s+(.+?)\s+from\b/);
   const when = text.match(/When:\s*(.+?)(?=\s+Our\b|[.⭐❓]|$)/);
 
-  const venue = where ? tidyVenue(where[1]) : prose ? tidyVenue(prose[1]) : '';
+  const whereText = where ? where[1] : prose ? prose[1] : '';
+  const venue = whereText ? tidyVenue(whereText) : '';
   const postcode = loc ? loc[1].replace(/\s+/g, ' ').trim() : '';
 
   return {
     iso: d ? `20${d[3]}-${d[2]}-${d[1]}` : null,
     postcode,
+    address: whereText ? cleanAddress(whereText) : '',
     // No usable venue text (one-off events often have none) — the postcode at
     // least tells people where to go.
     venue: venue || postcode,
@@ -195,8 +209,32 @@ async function fetchDetail(id: number): Promise<Detail> {
     return parseDetail(await fetchText(EVENT_URL(id)));
   } catch (e) {
     console.warn(`  ! detail fetch failed for ${id}: ${(e as Error).message}`);
-    return { iso: null, postcode: '', venue: '', time: '' };
+    return { iso: null, postcode: '', venue: '', address: '', time: '' };
   }
+}
+
+/** UK clock offset ("+00:00" or "+01:00") on a given date. */
+function londonOffset(iso: string): string {
+  const tz = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', timeZoneName: 'longOffset' })
+    .formatToParts(new Date(`${iso}T12:00:00Z`))
+    .find((p) => p.type === 'timeZoneName')?.value ?? 'GMT';
+  const m = tz.match(/GMT([+-]\d{2}:\d{2})/);
+  return m ? m[1] : '+00:00';
+}
+
+/** "6pm to 11pm" → ISO start/end on the event date; date only when no time is given. */
+function startEnd(iso: string, time: string): { start: string; end: string | null } {
+  const times = [...time.matchAll(/(\d{1,2})(?:[:.](\d{2}))?\s*(am|pm)/gi)].map((m) => {
+    let h = Number(m[1]) % 12;
+    if (m[3].toLowerCase() === 'pm') h += 12;
+    return `${String(h).padStart(2, '0')}:${m[2] ?? '00'}:00`;
+  });
+  if (times.length === 0) return { start: iso, end: null };
+  const off = londonOffset(iso);
+  return {
+    start: `${iso}T${times[0]}${off}`,
+    end: times[1] ? `${iso}T${times[1]}${off}` : null,
+  };
 }
 
 const SHORT_FMT = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' });
@@ -262,7 +300,9 @@ export async function getUpcomingEvents(): Promise<IfpvEvent[]> {
       iso: det.iso,
       postcode: det.postcode,
       venue: det.venue,
+      address: det.address,
       time: det.time,
+      ...startEnd(det.iso, det.time),
       day: da,
       month: MONTHS[mo],
       dateLabel: LABEL_FMT.format(isoToDate(det.iso)),
