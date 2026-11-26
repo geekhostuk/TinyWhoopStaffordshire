@@ -27,7 +27,7 @@ Built from the *"Tiny Whoop Staffordshire Design System"* Claude Design project.
 src/pages/index.astro     The home page (single scroll: intro · events · join)
 src/lib/ifpv.ts           iFPV event sync — fetch + merge both series, at build time
 src/styles/global.css     Design system (colours, type, spacing, buttons)
-public/assets/logo.jpg    Club logo
+public/assets/            Logo (transparent PNG), social card, icons
 automation/               Cron Worker that triggers a daily rebuild
 ```
 
@@ -93,6 +93,7 @@ rebuild on demand, POST the hook or use **Retry build** in the dashboard.
 - **Adding another series:** append it to the `SERIES` array in `src/lib/ifpv.ts`.
   A series that fails to fetch is warned about and skipped, so it can't break the
   build.
-- **Logo:** `public/assets/logo.jpg` has a light-grey matte (JPEGs can't be
-  transparent). A transparent **PNG** would sit more cleanly on the hero panel —
-  drop one in as `logo.png` and update the references in `index.astro`.
+- **Logo:** `public/assets/logo.png` is the transparent logo (trimmed, 480px wide).
+  `og-image.jpg` (1200×630, logo on navy) is the social share card, and
+  `icon-512.png` / `apple-touch-icon.png` / `favicon-48.png` are the square icons.
+  All are generated from one master PNG, so regenerate them all if the logo changes.
