@@ -1,7 +1,7 @@
 # Tiny Whoop Staffordshire — club website
 
 An [Astro](https://astro.build) static site for the Tiny Whoop Staffordshire
-(TWS) club, hosted on **Cloudflare Pages**. The **Upcoming events** section is
+(TWS) club, hosted on **Cloudflare Workers**. The **Upcoming events** section is
 synced from the club's events on the iFPV calendar — fetched at *build time* and
 baked into the static HTML.
 
@@ -28,7 +28,7 @@ src/pages/index.astro     The home page (single scroll: intro · events · join)
 src/lib/ifpv.ts           iFPV event sync — fetch + merge both series, at build time
 src/styles/global.css     Design system (colours, type, spacing, buttons)
 public/assets/logo.jpg    Club logo
-automation/               Cloudflare Worker that triggers scheduled rebuilds
+automation/               Cron Worker that triggers a daily rebuild
 ```
 
 ## Local development
@@ -42,47 +42,40 @@ npm run preview    # serve the built /dist locally
 
 ## How the events stay up to date on Cloudflare
 
-iFPV has no RSS/iCal feed, so `src/lib/ifpv.ts` reads its clean, static HTML.
-Because Cloudflare Pages has **no always-on server** to run a cron job, the
-sync runs as part of each **build**:
+iFPV has no RSS/iCal feed, so `src/lib/ifpv.ts` reads its clean, static HTML
+during the **build**. The site is deployed with **Cloudflare Workers Builds**
+(the `tws` Worker, git-connected, so every push to `main` rebuilds). A small
+cron Worker rebuilds it daily as well, so new events show up without a push:
 
 ```
-Cloudflare Cron Worker  ──POST──▶  Pages Deploy Hook  ──▶  Pages rebuild
-                                                             └─ re-runs ifpv.ts
-                                                             └─ fresh events baked in
+tws-ifpv-rebuild (cron, daily 05:00 UTC)  ──POST──▶  Workers Builds deploy hook
+                                                       └─ npm run build (re-runs ifpv.ts)
+                                                       └─ wrangler deploy → fresh events live
 ```
 
-### 1. Deploy the site to Cloudflare Pages
+### One-time setup
 
-- Push this repo to GitHub/GitLab.
-- Cloudflare dashboard → **Workers & Pages → Create → Pages → Connect to Git**.
-- Build settings: **Framework preset: Astro**, build command `npm run build`,
-  output directory `dist`.
-- Deploy. Every push rebuilds and re-syncs events.
+1. **Create a deploy hook.** Cloudflare dashboard → **Workers & Pages → tws →
+   Settings → Builds → Deploy Hooks**. Name it `daily-events-refresh`, branch
+   `main`, **Create**, and copy the URL
+   (`https://api.cloudflare.com/client/v4/workers/builds/deploy_hooks/<id>`).
+   Treat it like a password: anyone with it can trigger builds.
+2. **Deploy the cron Worker** and give it the hook URL:
 
-### 2. Create a Deploy Hook
+   ```powershell
+   cd automation
+   npx wrangler login                                              # if not already logged in
+   npx wrangler deploy --config wrangler.toml                      # deploys tws-ifpv-rebuild
+   npx wrangler secret put DEPLOY_HOOK_URL --config wrangler.toml  # paste the hook URL
+   ```
 
-- Pages project → **Settings → Builds & deployments → Deploy hooks → Add**.
-- Name it e.g. `scheduled-rebuild`, pick the production branch. Copy the URL
-  (looks like `https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/<id>`).
-- POSTing to that URL triggers a fresh build. Test it:
-  `curl -X POST "<deploy-hook-url>"`
+3. **Check it works.** Optional: `curl -X POST "<hook-url>"` should start a build
+   under **tws → Deployments / Builds**. After the first scheduled run, the cron
+   Worker's **Logs** tab shows `Deploy hook POST -> 200`.
 
-### 3. Schedule the rebuild (Cloudflare Worker Cron Trigger)
-
-```powershell
-cd automation
-npx wrangler deploy                      # deploys the tws-ifpv-rebuild worker
-npx wrangler secret put DEPLOY_HOOK_URL  # paste the deploy hook URL when prompted
-```
-
-The schedule lives in `automation/wrangler.toml` (`crons = ["0 7 */3 * *"]` =
-07:00 UTC every 3rd day). The Worker POSTs the deploy hook on that schedule, and
-visiting the Worker's URL triggers a rebuild on demand too.
-
-> **Simpler alternative:** if the repo is on GitHub, a scheduled GitHub Action
-> that `curl -X POST`s the deploy hook does the same job without a Worker.
-
+The schedule lives in `automation/wrangler.toml` (`crons = ["0 5 * * *"]`;
+use `"0 5 */2 * *"` for every 48 hours). The cron Worker has no public URL; to
+rebuild on demand, POST the hook or use **Retry build** in the dashboard.
 ## Notes
 
 - **Why build-time, not client-side?** iFPV sends no CORS headers, so a browser
